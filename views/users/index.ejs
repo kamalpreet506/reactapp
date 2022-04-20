@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1 id="name"><%= title %></h1>
+    <div id="messages"></div>
+    <form id="username" >
+        <input id="name_input" type="text">
+        <input type="submit" value="Send name">
+    </form>
+    <form  id="chat_form" style="display:none;">
+        <input id="chat_input" type="text">
+        <input type="submit" value="Send">
+    </form>
+    <input type="hidden" id="userid">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <script src="/socket.io/socket.io.js"></script>
+      <script type="text/javascript">
+      	var date = new Date();
+      	var timeunic = date.getTime()+Math.floor((Math.random() * 1000000) + 1);
+      	$('#userid').val(timeunic);
+      	 var socket = io.connect('http://localhost:3000/');
+		 socket.on('messages', function(data) {
+		 	console.log(data.from);
+		 	var id = $('#userid').val();
+		 	console.log(id);
+		 	if(data.from == id){
+		 		console.log("to");
+		 		$('#messages').append(data['msg']+ "<br/>");
+		 	}
+		 	if(data.to == id){
+		 		console.log("from");
+		 		$('#messages').append(data['msg']+ "<br/>");
+		 	}
+		 });
+
+		 $('#chat_form').submit(function(e){
+		     e.preventDefault();
+     		var message = $('#chat_input').val();
+		    var myObject = {
+		    		msg: message,
+		        	to: 123,
+		        	from: timeunic
+		    	};
+     		socket.emit('messages', myObject);
+     		$('#chat_input').val('');
+		 });
+
+	   $('#username').submit(function(e){
+		     e.preventDefault();
+
+		     var username = $('#name_input').val();
+		     var userdetail = {
+		                        username: username,
+		                        userid:timeunic
+		                    };
+		     socket.emit('newuser', userdetail,function (data){
+
+		        if(data){
+		                $('#username').hide();
+		                $('#chat_form').show();
+		                $('#name').html(username);
+		        }
+		     });
+		 });
+      </script>
+  </body>
+</html>

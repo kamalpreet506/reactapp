@@ -1,0 +1,84 @@
+<!doctype html>  
+<html lang="en">  
+    <head>
+
+    </head>
+    <body>
+        <div id="parent" style="display: flex;">
+        
+        	<div id="users" style="width: 200px; height: 400px;">users</div>
+        </div>
+
+<!--         <form id="form" id="chat_form">
+            <input id="chat_input" type="text">
+            <input type="submit" value="Send">
+        </form> -->
+
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <script src="/socket.io/socket.io.js"></script>
+
+        <script>  
+     var currentUser;
+	 var $userslist = $('#users');
+	 var socket = io.connect('http://localhost:3000');
+	  socket.on('connect', function(data) {
+	    socket.emit('joinoperator', 'operator');
+	 });
+
+
+ socket.on('messages', function(data) {
+ 		var divmsg = 'messagebox'+data.from;
+ 		currentUser = data.from;
+ 		if(data.from == 123){
+ 			var divmsg = 'messagebox'+data.to;
+ 			currentUser = data.to;
+ 		}
+ 		console.log(data);
+ 		console.log(divmsg);
+ 		if (!$('#'+divmsg).length){
+        	$('#parent').append('<div><div id="'+divmsg+'" style="width: 220px; height: 400px; border:1px solid;"></div><div id="form" id="chat_form"> <input id="chat_input'+currentUser+'" type="text"> <button onclick=send('+currentUser+') type="submit" value="Send">Send</button></div></div');
+    	}
+
+        $('#'+divmsg).append(data['msg']+ "<br/>");
+   });
+
+ socket.on('broadnewreq', function(data) {
+         var id = "#"+data.from;
+         $(id).css('color', 'red');
+   });
+
+ socket.on('updateusers',function(data){
+ 		console.log(data);
+        var html="";
+
+        for(var key in data){
+
+            html += "<a id='"+data[key]['userid']+"' href=javascript:selectuser('"+data[key]['userid']+"')>"+data[key]['username'] + "</a></br>";
+
+        }
+
+        $userslist.html(html);
+
+ });
+function selectuser(cusername){
+    //alert(cusername);
+    currentUser = cusername;
+    socket.emit('selectuser', currentUser);
+    $('#messages').empty();
+}
+
+ function send(user){
+ 	var message = $('#chat_input'+user).val();
+	var myObject = {
+		msg: message,
+		from: 123,
+		to: user
+	};
+	//alert(message);
+	socket.emit('messages', myObject);
+	$('#chat_input').val('');
+ }
+
+</script>
+    </body>
+</html>  
