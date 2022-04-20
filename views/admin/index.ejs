@@ -56,7 +56,6 @@
 
  });
 function selectuser(cusername){
-    //alert(cusername);
     currentUser = cusername;
     socket.emit('selectuser', currentUser);
     $('#messages').empty();
@@ -69,7 +68,7 @@ function selectuser(cusername){
 		from: 123,
 		to: user
 	};
-	//alert(message);
+
 	socket.emit('messages', myObject);
 	$('#chat_input').val('');
  }
